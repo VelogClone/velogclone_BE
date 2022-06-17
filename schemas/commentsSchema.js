@@ -30,3 +30,4 @@ const CommentSchema = mongoose.Schema({
 
 CommentSchema.plugin(AutoIncrement, { inc_field: 'commentId' });
 module.exports = mongoose.model('Comment', CommentSchema);
+
