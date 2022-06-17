@@ -27,5 +27,5 @@ const CommentSchema = mongoose.Schema({
     },
 })
 
-postsSchema.plugin(AutoIncrement, { inc_field: 'commentId' });
+CommentSchema.plugin(AutoIncrement, { inc_field: 'commentId' });
 module.exports = mongoose.model('Comment', CommentSchema);
