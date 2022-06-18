@@ -1,3 +1,4 @@
+
 const express = require('express');
 const router = express.Router();
 const auth = require('../middlewares/authMiddleware');
@@ -26,6 +27,7 @@ const upload = multer({
     },
   }),
 });
+
 // 게시물 작성
 // upload.single('postImage')에서 'image'는 변수명
 // auth추가
@@ -48,6 +50,7 @@ const upload = multer({
 // });
 
 // 게시물작성
+
 router.post('/', /*auth,*/ upload.single('postImage'), async (req, res) => {
   console.log(req.body);
   console.log(req.file);
@@ -59,9 +62,11 @@ router.post('/', /*auth,*/ upload.single('postImage'), async (req, res) => {
   const postDate = date + ' ' + hours + ':' + minutes;
   const userId = 'userId123';
   const userImage = 'http://3.39.226.20/imagename.jpg';
+
   //const { userId, userImage } = res.locals.user;
   const { postTitle, postContent } = req.body;
   const postImage = 'http://3.39.226.20/' + req.file.filename;
+
 
   await Post.create({
     postTitle,
@@ -133,12 +138,14 @@ router.put(
 
     const { postTitle, postContent } = req.body;
 
+
     // const obj = JSON.parse(JSON.stringify(req.file));
     // console.log("obj입니다:", obj)
     // const value = Object.values(obj)
     // const imageUrl = 'http://3.34.45.167/' + value.splice(5,1)
     // console.log("imgaUrl 입니다:", imageUrl);
     const existPost = await Post.findOne({ postId: postId });
+
 
     const postImage = 'http://localhost:3000/' + req.file.filename;
     console.log(req.file);
@@ -160,3 +167,4 @@ router.put(
 );
 
 module.exports = router;
+
