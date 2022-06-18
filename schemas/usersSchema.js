@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');
 
 const UserSchema = mongoose.Schema({
-  userId: {
+  nickname: {
     type: String,
     required: true,
   },
@@ -15,3 +15,10 @@ const UserSchema = mongoose.Schema({
 });
 
 module.exports = mongoose.model('User', UserSchema);
+
+// UserSchema.virtual('userId').get(function () {
+//   return this._id.toHexString();
+// });
+// UserSchema.set('toJSON', {
+//   virtuals: true,
+// });
