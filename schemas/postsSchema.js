@@ -1,10 +1,11 @@
 const mongoose = require('mongoose');
+
 const AutoIncrement = require('mongoose-sequence')(mongoose);
 
-const PostSchema = mongoose.Schema({
+const PostSchema = new mongoose.Schema({
   postId: {
     type: Number,
-    required: true,
+    // required: true,
   },
   postTitle: {
     type: String,
@@ -27,11 +28,10 @@ const PostSchema = mongoose.Schema({
   },
   userId: {
     type: String,
-    required: true,
+    // required: true,
   },
   userImage: {
     type: String,
-    required: true,
   },
 });
 

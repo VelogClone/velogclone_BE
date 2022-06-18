@@ -1,12 +1,12 @@
 const router = require('express').Router();
 const Post = require('../schemas/postsSchema');
-const Comment = require('../Schemas/commentsSchema');
+const Comment = require('../schemas/commentsSchema');
 const User = require('../schemas/usersSchema');
 const authMiddleware = require('../middlewares/authMiddleware');
 
 // 코멘트 작성: 유저확인
 router.post('/:postId', async (req, res) => {
-  const { postId } = parseInt(req.params);
+  const { postId } = req.params;
   //   const { nickname } = res.locals.user;
   const { comment } = req.body;
 
@@ -29,9 +29,9 @@ router.post('/:postId', async (req, res) => {
     // userImage,
     postId,
   });
-  const commentCount = await Comment.find({ postId: postId });
+  const commentCount = await Comment.find({ postId: parseInt(postId) });
   await Post.updateOne(
-    { postId: postId },
+    { postId: parseInt(postId) },
     { $set: { commentCount: commentCount.length } }
   );
   res.status(200).json({
@@ -43,7 +43,7 @@ router.post('/:postId', async (req, res) => {
 
 // 코멘트 삭제: 유저확인
 router.delete('/:commentId', async (req, res) => {
-  const { commentId } = parseInt(req.params);
+  const { commentId } = req.params;
   //   const { nickname } = res.locals.user;
   const existingComment = await Comment.findOne({
     commentId: commentId,
@@ -54,7 +54,7 @@ router.delete('/:commentId', async (req, res) => {
   //       .status(400)
   //       .json({ success: false, message: '내가 쓴 댓글이 아닙니다' });
   //   } else {
-  await Comment.deleteOne({ commentId: commentId });
+  await Comment.deleteOne({ commentId: parseInt(commentId) });
   const commentCount = await Comment.find({
     postId: existingComment.postId,
   });
@@ -68,7 +68,7 @@ router.delete('/:commentId', async (req, res) => {
 
 // 코멘트 수정: 유저확인
 router.put('/:commentId', async (req, res) => {
-  const { commentId } = parseInt(req.params);
+  const { commentId } = req.params;
   //   const { nickname } = res.locals.user;
   const { comment } = req.body;
   //   const existingComment = await Comment.findOne({ commentId: commentId });
@@ -78,7 +78,10 @@ router.put('/:commentId', async (req, res) => {
   //       .status(400)
   //       .json({ success: false, message: '내가 쓴 댓글이 아닙니다' });
   //   } else {
-  await Comment.updateOne({ commentId: commentId }, { $set: { comment } });
+  await Comment.updateOne(
+    { commentId: parseInt(commentId) },
+    { $set: { comment } }
+  );
   res.status(200).json({ success: true, message: '댓글 수정 완료' });
   //   }
 });
