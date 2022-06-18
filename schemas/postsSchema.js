@@ -1,10 +1,11 @@
 const mongoose = require('mongoose');
+
 const AutoIncrement = require('mongoose-sequence')(mongoose);
 
-const PostSchema = mongoose.Schema({
+const PostSchema = new mongoose.Schema({
   postId: {
     type: Number,
-    required: true,
+    // required: true,
   },
   postTitle: {
     type: String,
@@ -27,13 +28,17 @@ const PostSchema = mongoose.Schema({
   },
   userId: {
     type: String,
-    required: true,
+    // required: true,
+  },
+  userImage: {
+    type: String,
   },
   
 });
 
 PostSchema.plugin(AutoIncrement, { inc_field: 'postId' });
 module.exports = mongoose.model('Post', PostSchema);
+<<<<<<< HEAD
 
 // PostSchema.virtual("postId").get(function () {
 //     return this._id.toHexString();
@@ -41,3 +46,5 @@ module.exports = mongoose.model('Post', PostSchema);
 //   PostSchema.set("toJSON", {
 //     virtuals: true,
 //   });
+=======
+>>>>>>> 27e759dff461bd6bcfc08cea35fdaecdd47ef934
