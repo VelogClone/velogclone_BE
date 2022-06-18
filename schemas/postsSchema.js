@@ -29,6 +29,7 @@ const PostSchema = mongoose.Schema({
     type: String,
     required: true,
   },
+  
 });
 
 PostSchema.plugin(AutoIncrement, { inc_field: 'postId' });
