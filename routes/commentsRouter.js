@@ -71,7 +71,7 @@ router.put('/:commentId', async (req, res) => {
   const { commentId } = parseInt(req.params);
   //   const { nickname } = res.locals.user;
   const { comment } = req.body;
-  const existingComment = await Comment.findOne({ commentId: commentId });
+  //   const existingComment = await Comment.findOne({ commentId: commentId });
 
   //   if (nickname !== existingComment.nickname) {
   //     res
