@@ -1,7 +1,7 @@
 
 const express = require('express');
 const router = express.Router();
-const auth = require('../middlewares/authMiddleware');
+const authMiddleware = require('../middlewares/authMiddleware');
 const Post = require('../schemas/postsSchema');
 const Comment = require('../schemas/commentsSchema');
 const multer = require('multer');
