@@ -26,6 +26,7 @@ const upload = multer({
     },
   }),
 });
+
 // 게시물 작성
 // upload.single('postImage')에서 'image'는 변수명
 // auth추가
@@ -48,6 +49,7 @@ const upload = multer({
 // });
 
 // 게시물작성
+
 router.post(
   '/',
   authMiddleware,
@@ -131,8 +133,10 @@ router.put(
     const user = res.locals.user;
     const nickname = user.nickname;
     const { postTitle, postContent } = req.body;
+
     const existPost = await Post.findOne({ postId: postId });
     const postImage = 'http://3.35.170.203/' + req.file.filename;
+
     console.log(req.file);
     if (nickname === existPost.nickname) {
       if (existPost) {
