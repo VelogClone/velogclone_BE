@@ -33,7 +33,18 @@ const PostSchema = new mongoose.Schema({
   userImage: {
     type: String,
   },
+  
 });
 
 PostSchema.plugin(AutoIncrement, { inc_field: 'postId' });
 module.exports = mongoose.model('Post', PostSchema);
+<<<<<<< HEAD
+
+// PostSchema.virtual("postId").get(function () {
+//     return this._id.toHexString();
+//   });
+//   PostSchema.set("toJSON", {
+//     virtuals: true,
+//   });
+=======
+>>>>>>> 27e759dff461bd6bcfc08cea35fdaecdd47ef934

@@ -122,3 +122,4 @@ router.get('/auth', authMiddleware, async (req, res) => {
 });
 
 module.exports = router;
+
