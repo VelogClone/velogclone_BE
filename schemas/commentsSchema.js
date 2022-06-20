@@ -17,7 +17,7 @@ const CommentSchema = new mongoose.Schema({
     required: true,
   },
 
-  userId: {
+  nickname: {
     type: String,
     // required: true,
   },

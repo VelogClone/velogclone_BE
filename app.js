@@ -7,14 +7,7 @@ const cors = require('cors');
 const app = express();
 require('dotenv').config();
 const connect = require('./schemas');
-const port = 3000;
-app.use(
-  cors({
-    exposedHeaders: ['authorization'],
-    origin: '*',
-    credentials: 'true',
-  })
-);
+app.use(cors({ origin: true, credentials: true }));
 connect();
 <<<<<<< HEAD
 app.use('port', process.env.PORT || 3000)
@@ -32,7 +25,7 @@ app.use((req, res, next) => {
   next();
 });
 
-app.listen(port, () => {
+app.listen(process.env.PORT, () => {
   console.log(`listening on 3000`);
 <<<<<<< HEAD
 });
