@@ -2,11 +2,7 @@ const mongoose = require('mongoose');
 require('dotenv').config();
 
 const connect = () => {
-  mongoose
-    .connect(
-      'mongodb+srv://choi927:choi927@cluster0.2wcr6.mongodb.net/velog?retryWrites=true&w=majority'
-    )
-    .catch((err) => console.log(err));
+  mongoose.connect(process.env.DB_URL).catch((err) => console.log(err));
 };
 
 mongoose.connection.on('error', (err) => {

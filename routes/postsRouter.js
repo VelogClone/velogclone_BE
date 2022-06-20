@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const auth = require('../middlewares/authMiddleware');
+const authMiddleware = require('../middlewares/authMiddleware');
 const Post = require('../schemas/postsSchema');
 const Comment = require('../schemas/commentsSchema');
 const multer = require('multer');
@@ -48,37 +48,39 @@ const upload = multer({
 // });
 
 // 게시물작성
-router.post('/', /*auth,*/ upload.single('postImage'), async (req, res) => {
-  console.log(req.body);
-  console.log(req.file);
+router.post(
+  '/',
+  authMiddleware,
+  upload.single('postImage'),
+  async (req, res) => {
+    console.log(req.body);
+    console.log(req.file);
 
-  const now = new Date();
-  const date = now.toLocaleDateString('ko-KR');
-  const hours = now.getHours();
-  const minutes = now.getMinutes();
-  const postDate = date + ' ' + hours + ':' + minutes;
-  const userId = 'userId123';
-  const userImage = 'http://3.39.226.20/imagename.jpg';
-  //const { userId, userImage } = res.locals.user;
-  const { postTitle, postContent } = req.body;
-  const postImage = 'http://3.39.226.20/' + req.file.filename;
+    const now = new Date();
+    const date = now.toLocaleDateString('ko-KR');
+    const hours = now.getHours();
+    const minutes = now.getMinutes();
+    const postDate = date + ' ' + hours + ':' + minutes;
+    const { nickname, userImage } = res.locals.user;
+    const { postTitle, postContent } = req.body;
+    const postImage = 'http://3.35.170.203/' + req.file.filename;
 
-  await Post.create({
-    postTitle,
-    postContent,
-    userId,
-    postDate,
-    postImage,
-    userImage,
-  });
+    await Post.create({
+      postTitle,
+      postContent,
+      nickname,
+      postDate,
+      postImage,
+      userImage,
+    });
 
-  res.json({ success: 'msg' });
-});
+    res.status(200).json({ success: true, postImage });
+  }
+);
 
 //전체 게시물 조회
 router.get('/', async (req, res) => {
-  const post = await Post.find().sort('postId');
-
+  const post = await Post.find().sort({ postId: -1 });
   res.send({ post });
 });
 
@@ -86,75 +88,64 @@ router.get('/', async (req, res) => {
 router.get('/:postId', async (req, res) => {
   const { postId } = req.params;
   const post = await Post.findOne({ postId: postId });
-  const comments = await Comment.find({ postId: postId });
-
-  res.json({ post, comments });
+  const comments = await Comment.find({ postId: postId }).sort({
+    commentId: -1,
+  });
+  res.status(200).json({ post, comments });
 });
 
 //게시글 삭제
-router.delete(
-  '/:postId',
-  /*auth,*/ async (req, res) => {
-    const { postId } = req.params;
-    // const user = res.locals.user;
-    /* console.log(user)
-    const userId = user["userId"]  //user["userId"];
-    console.log(userId) */
-    const userId = 'userId123';
-    const existPost = await Post.find({ postId: postId });
-    const existComment = await Comment.find({ postId: postId });
-    console.log('코멘트입니다:', existComment);
+router.delete('/:postId', authMiddleware, async (req, res) => {
+  const { postId } = req.params;
+  const user = res.locals.user;
 
-    if (userId === existPost[0]['userId']) {
-      if (existPost && existComment) {
-        await Post.deleteOne({ postId: postId });
-        await Comment.deleteMany({ postId: postId });
-        res.send({ result: 'success' });
-      } else if (existPost) {
-        await Post.deleteOne({ postId: postId });
-        res.send({ result: 'success' });
-      }
-    } else {
-      res.status(401).send({ result: 'fail' });
+  const nickname = user.nickname;
+  const existPost = await Post.findOne({ postId: parseInt(postId) });
+  const existComment = await Comment.find({ postId: parseInt(postId) });
+  console.log('코멘트입니다:', existComment);
+  console.log(nickname);
+  console.log(existPost.nickname);
+
+  if (nickname === existPost.nickname) {
+    if (existPost && existComment) {
+      await Post.deleteOne({ postId: parseInt(postId) });
+      await Comment.deleteMany({ postId: parseInt(postId) });
+      res.send({ result: 'success' });
+    } else if (existPost) {
+      await Post.deleteOne({ postId: parseInt(postId) });
+      res.status(200).send({ result: 'success' });
     }
+  } else {
+    res.status(401).send({ result: 'fail' });
   }
-);
+});
 
-//게시글 수정
+// 게시글 수정
 router.put(
   '/:postId',
-  /* auth,*/ upload.single('postImage'),
+  authMiddleware,
+  upload.single('postImage'),
   async (req, res) => {
     ///posts/:postId
     const { postId } = req.params;
-    /* const user = res.locals.user;
-    const userId = user.userId */
-    const userId = 'userId123';
-
+    const user = res.locals.user;
+    const nickname = user.nickname;
     const { postTitle, postContent } = req.body;
-
-    // const obj = JSON.parse(JSON.stringify(req.file));
-    // console.log("obj입니다:", obj)
-    // const value = Object.values(obj)
-    // const imageUrl = 'http://3.34.45.167/' + value.splice(5,1)
-    // console.log("imgaUrl 입니다:", imageUrl);
     const existPost = await Post.findOne({ postId: postId });
-
-    const postImage = 'http://localhost:3000/' + req.file.filename;
+    const postImage = 'http://3.35.170.203/' + req.file.filename;
     console.log(req.file);
-    if (userId === existPost.userId) {
+    if (nickname === existPost.nickname) {
       if (existPost) {
         await Post.updateOne(
           { postId: postId },
           { $set: { postTitle, postContent, postImage } }
         );
-
-        res.send({ result: 'success' });
+        res.status(200).json({ result: 'success', postImage });
       } else {
         res.status(400).send({ result: 'fail' });
       }
     } else {
-      res.send({ result: 'fail ' });
+      res.status(400).send({ result: 'fail' });
     }
   }
 );
