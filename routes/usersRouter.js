@@ -1,23 +1,42 @@
 const express = require('express');
 const jwt = require("jsonwebtoken");
-const User = require("../schemas/usersSchema");
+const User = require('../schemas/usersSchema');
 const router = require('express').Router();
-//const Joi = require("joi")
-//회원가입
+const passport = require("../passport/passport.js");
+require("dotenv").config();
 
+//Kakao 로그인
+router.get("/kakao", passport.authenticate("kakao"));
 
-/*const postUsersSchema = Joi.object({
-    userId: Joi
-        .string()
-        .required(),
-    nickname: Joi
-        .string()
-        .required(),
-    password: Joi
-        .string()
-        .required()
-  });*/
-  
+const kakaoCallback = (req, res, next) => {
+  passport.authenticate(
+    "kakao",
+    { failureRedirect: "/" },
+    (err, user, info) => {
+      if (err) return next(err);
+      console.log("콜백~~~");
+      const { email, nickname } = user;
+
+      // 토큰 옵션 설정
+      const payload = { email };
+      const secret = process.env.JWT_SECRET_KEY; 시크릿키 
+      const options = {
+        issuer: "백엔드 개발자", // 발행자
+        expiresIn: "1d", // 날짜: $$d, 시간: $$h, 분: $$m, 그냥 숫자만 넣으면 ms단위
+      };
+
+      const token = jwt.sign(payload, secret, options);
+      result = {
+        token,
+        email,
+        nickname,
+      };
+      res.json({ result });
+    }
+  )(req, res, next);
+};
+router.get("auth/kakao/callback", kakaoCallback);
+
 
 //회원가입
 router.post("/register", async (req, res) => {
@@ -50,11 +69,6 @@ router.post("/register", async (req, res) => {
   
 
 //로그인
-  //const postUserSchema = Joi.object({
-   // userId: Joi.string().required(),
-  //  password: Joi.string().required(),
-  //});
-  
 
   router.post("/login", async (req, res) => {
     try {
