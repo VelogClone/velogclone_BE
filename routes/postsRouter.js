@@ -67,7 +67,7 @@ router.post(
     const { postTitle, postContent } = req.body;
     const postImage = 'http://3.35.170.203/' + req.file.filename;
 
-    await Post.create({
+    const post = await Post.create({
       postTitle,
       postContent,
       nickname,
@@ -76,7 +76,7 @@ router.post(
       userImage,
     });
 
-    res.status(200).json({ success: true, postImage });
+    res.status(200).json({ success: true, post });
   }
 );
 
