@@ -4,59 +4,23 @@ const authMiddleware = require('../middlewares/authMiddleware');
 const Post = require('../schemas/postsSchema');
 const Comment = require('../schemas/commentsSchema');
 const multer = require('multer');
+const multerS3 = require('multer-s3');
+const aws = require('aws-sdk');
+const s3 = new aws.S3();
 const path = require('path');
 
 const upload = multer({
-  dest: 'static/',
-  storage: multer.diskStorage({
-    destination(req, file, cb) {
-      cb(null, './static');
-    },
-    filename(req, file, cb) {
-      const ext = path.extname(file.originalname);
-      cb(null, path.basename(file.originalname, ext) + Date.now() + ext);
-    },
-    fileFilter: (req, file, cb) => {
-      if (['image/png', 'image/jpg', 'image/jpeg'].includes(file.mimetype))
-        cd(null, true);
-      else cd(Error('PNG, jpeg만 업로드 하세요'), false);
-    },
-    limits: {
-      fileSize: 1024 * 1024,
-    },
-  }),
+  storage: multerS3({
+      s3: s3,
+      bucket: 'jerryjudymary',
+      acl: 'public-read',
+      key: function(req, file, cb){
+          cb(null, Date.now() + '.' + file.originalname.split('.').pop()); // 이름 설정
+      }
+  })
 });
 
-// 게시물 작성
-// upload.single('postImage')에서 'image'는 변수명
-// auth추가
-// router.post("/", upload.single(postImage), async(req, res) => { //posts
-//     console.log(req.file)
-//     // req.file내에는 fieldname, originalname,
-//     //encoding, destination, filename 등의 정보가 저장
-//     // 저장 성공시 asw s3 버킷에 저장
-//     const postImage = req.file.location;
-//     const createdAt = new Date().toLocaleString()
-//     // const { user } = res.locals.user
-//     // const userId = user["userId"]
-//     const userId = "TEST입니다"
-//     const { title, content, nickName} = req.body; // userId 추가해야합니다.
-//     console.log(postId);
-//     await Post.create({ title, content, nickName, postImage, userId, createdAt });
-
-//     res.json({ success: "msg"})
-
-// });
-
-// 게시물작성
-
-router.post(
-  '/',
-  authMiddleware,
-  upload.single('postImage'),
-  async (req, res) => {
-    console.log(req.body);
-    console.log(req.file);
+router.post('/', authMiddleware, upload.single('postImage'), async (req, res) => {
 
     const now = new Date();
     const date = now.toLocaleDateString('ko-KR');
@@ -65,7 +29,7 @@ router.post(
     const postDate = date + ' ' + hours + ':' + minutes;
     const { nickname, userImage } = res.locals.user;
     const { postTitle, postContent } = req.body;
-    const postImage = 'http://3.35.170.203/' + req.file.filename;
+    const postImage = req.file.location;
 
     await Post.create({
       postTitle,
@@ -123,19 +87,15 @@ router.delete('/:postId', authMiddleware, async (req, res) => {
 });
 
 // 게시글 수정
-router.put(
-  '/:postId',
-  authMiddleware,
-  upload.single('postImage'),
-  async (req, res) => {
-    ///posts/:postId
+router.put('/:postId', authMiddleware, upload.single('postImage'), async (req, res) => {
+
     const { postId } = req.params;
     const user = res.locals.user;
     const nickname = user.nickname;
     const { postTitle, postContent } = req.body;
 
     const existPost = await Post.findOne({ postId: postId });
-    const postImage = 'http://3.35.170.203/' + req.file.filename;
+    const postImage = req.file.location;
 
     console.log(req.file);
     if (nickname === existPost.nickname) {
