@@ -31,7 +31,7 @@ router.post('/', authMiddleware, upload.single('postImage'), async (req, res) =>
     const { postTitle, postContent } = req.body;
     const postImage = req.file.location;
 
-    await Post.create({
+    const post = await Post.create({
       postTitle,
       postContent,
       nickname,
@@ -40,7 +40,7 @@ router.post('/', authMiddleware, upload.single('postImage'), async (req, res) =>
       userImage,
     });
 
-    res.status(200).json({ success: true, postImage });
+    res.status(200).json({ success: true, post });
   }
 );
 

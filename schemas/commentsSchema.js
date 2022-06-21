@@ -6,26 +6,21 @@ const CommentSchema = new mongoose.Schema({
     type: Number,
     // required: true,
   },
-
   comment: {
     type: String,
     required: true,
   },
-
   commentDate: {
     type: String,
     required: true,
   },
-
   nickname: {
     type: String,
     // required: true,
   },
-  
   userImage: {
     type: String,
   },
-
   postId: {
     type: Number,
     required: true,

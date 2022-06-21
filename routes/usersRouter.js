@@ -37,6 +37,7 @@ const userSchema = joi.object({
   nickname: joi.string(),
   password: joi.string(),
   passwordCheck: joi.string(),
+  userImage: joi.string(),
 });
 
 //회원가입
@@ -56,17 +57,30 @@ router.post('/signup', upload.single('userImage'), async (req, res) => {
         errormessage: '이미 가입된 이메일 또는 닉네임이 있습니다.',
       });
     }
-
     const hashedPassword = await new hash(password, 10);
-    const userImage = 'http://3.35.170.203/' + req.file.filename;
-
-    const user = await User.create({
-      email,
-      nickname,
-      hashedPassword,
-      userImage,
-    });
-    res.status(200).json({ success: true, message: '회원가입 성공', user });
+    if (req.file == undefined) {
+      const userImage = 'http://3.35.170.203/defaultuserImage1655721219161.png';
+      const user = await User.create({
+        email,
+        nickname,
+        hashedPassword,
+        userImage,
+      });
+      res
+        .status(200)
+        .json({ success: true, message: '회원가입 성공', user, userImage });
+    } else {
+      const userImage = 'http://3.35.170.203/' + req.file.filename;
+      const user = await User.create({
+        userImage,
+        email,
+        nickname,
+        hashedPassword,
+      });
+      res
+        .status(200)
+        .json({ success: true, message: '회원가입 성공', user, userImage });
+    }
   } catch (error) {
     console.log(error);
     res
@@ -79,20 +93,26 @@ router.post('/signup', upload.single('userImage'), async (req, res) => {
 router.post('/login', async (req, res) => {
   try {
     const { email, password } = req.body;
-    const existingUser = await User.findOne({ email: email });
+    const user = await User.findOne({ email: email });
 
-    const isValid = await compare(password, existingUser.hashedPassword);
+    const isValid = await compare(password, user.hashedPassword);
     if (!isValid) {
       return res.status(400).send({
         errormessage: '이메일 또는 비밀번호를 확인해주세요',
       });
     }
     const token = jwt.sign(
-      { userId: existingUser._id.toHexString() },
+      { userId: user._id.toHexString() },
       process.env.JWT_SECRET_KEY,
       { expiresIn: '6h' }
     );
-    res.send({ token });
+    res.status(200).json({
+      token,
+      user: {
+        nickname: user.nickname,
+        userImage: user.userImage,
+      },
+    });
   } catch (error) {
     console.error(error);
     res.status(400).send({
@@ -122,4 +142,3 @@ router.get('/auth', authMiddleware, async (req, res) => {
 });
 
 module.exports = router;
-

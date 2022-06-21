@@ -33,7 +33,6 @@ const PostSchema = new mongoose.Schema({
   userImage: {
     type: String,
   },
-  
 });
 
 PostSchema.plugin(AutoIncrement, { inc_field: 'postId' });
