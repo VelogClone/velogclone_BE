@@ -16,13 +16,17 @@ connect();
 // 이미지 업로드 Multer
 const upload = multer({
   storage: multerS3({
-      s3: s3,
-      bucket: 'jerryjudymary',
-      acl: 'public-read',
-      key: function(req, file, cb){
-          cb(null, 'userImage/' + Date.now() + '.' + file.originalname.split('.').pop()); // 이름 설정
-      }
-  })
+
+    s3: s3,
+    bucket: 'jerryjudymary',
+    acl: 'public-read',
+    key: function (req, file, cb) {
+      cb(
+        null,
+        'userImage/' + Date.now() + '.' + file.originalname.split('.').pop()
+      ); // 이름 설정
+    },
+  }),
 });
 
 const userSchema = joi.object({
@@ -53,14 +57,16 @@ router.post('/signup', upload.single('userImage'), async (req, res) => {
 
     const hashedPassword = await new hash(password, 10);
     if (req.file == undefined) {
-      const userImage = process.env.DEFAULT_USER_IMG + 'defaultuserImage1655721219161.png';
-    const user = await User.create({
-      email,
-      nickname,
-      hashedPassword,
-      userImage,
-    });
-    res
+
+      const userImage =
+        process.env.DEFAULT_USER_IMG + 'defaultuserImage1655721219161.png';
+      const user = await User.create({
+        email,
+        nickname,
+        hashedPassword,
+        userImage,
+      });
+      res
         .status(200)
         .json({ success: true, message: '회원가입 성공', user, userImage });
     } else {
