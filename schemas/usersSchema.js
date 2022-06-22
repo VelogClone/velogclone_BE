@@ -1,48 +1,27 @@
 const mongoose = require('mongoose');
-const bcrypt = require("bcrypt");
 
-const UsersSchema = new mongoose.Schema({
+const UserSchema = new mongoose.Schema({
   nickname: {
     type: String,
-    required: true,
+    // required: true,
+  },
+  hashedPassword: {
+    type: String,
+    // required: true,
   },
   email: {
-   type: String,
-  required: true,
-},
-  password: {
     type: String,
-    required: true,
+    // required: true,
   },
-  //userImage: {
-  //  type: String,
-  //},
+  userImage: {
+    type: String,
+  },
 });
 
-
-UsersSchema.pre("save", function (next) {
-  const user = this;
-
-  if (user.password) {
-    
-    bcrypt.genSalt(10, (err, salt) => {
-        if (err) return next(err);
-        bcrypt.hash(user.password, salt, (err, hash) => {
-            if (err) return next(err);
-            user.password = hash;
-            next();
-        });
-    });
-} else {
-    next();
-}
+UserSchema.virtual('userId').get(function () {
+  return this._id.toHexString();
 });
-
-UsersSchema.methods.compare = function (password) {
-  const user = this;
-
-  return bcrypt.compareSync(password, user.password);
-};
-
-module.exports = mongoose.model('User', UsersSchema);
-
+UserSchema.set('toJSON', {
+  virtuals: true,
+});
+module.exports = mongoose.model('User', UserSchema);

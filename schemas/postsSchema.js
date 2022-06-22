@@ -1,3 +1,5 @@
+
+
 const mongoose = require('mongoose');
 
 const AutoIncrement = require('mongoose-sequence')(mongoose);
@@ -11,8 +13,12 @@ const PostSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
-  postImage: {
+  thumbnailImage: {
     type: String,
+  },
+  postContentMd: {
+    type: String,
+    required: true,
   },
   postContent: {
     type: String,
@@ -26,7 +32,7 @@ const PostSchema = new mongoose.Schema({
     type: Number,
     default: 0,
   },
-  userId: {
+  nickname: {
     type: String,
     // required: true,
   },
