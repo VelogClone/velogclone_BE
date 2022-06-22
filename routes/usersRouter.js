@@ -16,7 +16,6 @@ connect();
 // 이미지 업로드 Multer
 const upload = multer({
   storage: multerS3({
-
     s3: s3,
     bucket: 'jerryjudymary',
     acl: 'public-read',
@@ -57,7 +56,6 @@ router.post('/signup', upload.single('userImage'), async (req, res) => {
 
     const hashedPassword = await new hash(password, 10);
     if (req.file == undefined) {
-
       const userImage =
         process.env.DEFAULT_USER_IMG + 'defaultuserImage1655721219161.png';
       const user = await User.create({
@@ -121,7 +119,7 @@ router.post('/login', async (req, res) => {
   }
 });
 
-router.get('/auth', authMiddleware, async (req, res) => {
+router.get('/auth', authMiddleware, (req, res) => {
   try {
     console.log(res.locals);
     const { user } = res.locals;
@@ -142,4 +140,3 @@ router.get('/auth', authMiddleware, async (req, res) => {
 });
 
 module.exports = router;
-

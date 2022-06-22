@@ -11,7 +11,6 @@ const { markdownToTxt } = require('markdown-to-txt');
 
 const upload = multer({
   storage: multerS3({
-
     s3: s3,
     bucket: 'jerryjudymary',
     acl: 'public-read',
@@ -40,6 +39,7 @@ router.post(
 // 게시글 작성
 
 router.post('/', authMiddleware, async (req, res) => {
+  console.log(res.locals.user);
   const now = new Date();
   const date = now.toLocaleDateString('ko-KR');
   const hours = now.getHours();
