@@ -7,7 +7,7 @@ const multer = require('multer');
 const multerS3 = require('multer-s3');
 const aws = require('aws-sdk');
 const s3 = new aws.S3();
-const path = require('path');
+const { markdownToTxt } = require('markdown-to-txt');
 
 const upload = multer({
   storage: multerS3({
@@ -20,7 +20,20 @@ const upload = multer({
   })
 });
 
-router.post('/', authMiddleware, upload.single('postImage'), async (req, res) => {
+// 이미지 업로드 - 미리보기용 url 응답
+
+router.post('/images', authMiddleware, upload.single('postImage'), async (req, res) => {
+    try {
+      const postImage = req.file.location
+      res.status(200).json({ success: true, postImage });
+    } catch (err) {
+      res.status(500).send({ result: 'fail' });
+    };
+});
+
+// 게시글 작성
+
+router.post('/', authMiddleware, async (req, res) => {
 
     const now = new Date();
     const date = now.toLocaleDateString('ko-KR');
@@ -28,21 +41,53 @@ router.post('/', authMiddleware, upload.single('postImage'), async (req, res) =>
     const minutes = now.getMinutes();
     const postDate = date + ' ' + hours + ':' + minutes;
     const { nickname, userImage } = res.locals.user;
-    const { postTitle, postContent } = req.body;
-    const postImage = req.file.location;
+    const { postTitle, postContentMd } = req.body;
+    const postContent = markdownToTxt(postContentMd);
 
-    const post = await Post.create({
+    let postImage;
+
+    if ( postContentMd.includes('](https://') !== false ) {
+
+    postImage = postContentMd.substring(
+    postContentMd.indexOf('](https://') + 2,
+    postContentMd.indexOf(')')
+    );
+
+    } else {
+
+      postImage = null;
+
+    };
+
+    const post = await Post.create ({
       postTitle,
-      postContent,
+      postContentMd,
       nickname,
       postDate,
       postImage,
       userImage,
+      postContent
     });
 
     res.status(200).json({ success: true, post });
   }
 );
+
+  // 복수의 url 배열 저장용 
+
+    /* -- postImage에 각 파일의 location을 배열로 넣어줌 --
+
+    const postImageArray = req.files;
+
+    let blankImageArray = [];
+
+    function LocationPusher() { for (let i = 0; i < postImageArray.length; i++) {
+        blankImageArray.push(postImageArray[i].location)
+    } return blankImageArray
+  }
+    const postImage = LocationPusher()
+
+    // -------------------------------------------------- */
 
 //전체 게시물 조회
 router.get('/', async (req, res) => {
@@ -87,24 +132,37 @@ router.delete('/:postId', authMiddleware, async (req, res) => {
 });
 
 // 게시글 수정
-router.put('/:postId', authMiddleware, upload.single('postImage'), async (req, res) => {
+
+router.put('/:postId', authMiddleware, async (req, res) => {
 
     const { postId } = req.params;
     const user = res.locals.user;
     const nickname = user.nickname;
-    const { postTitle, postContent } = req.body;
-
+    const { postTitle, postContentMd } = req.body;
+    const postContent = markdownToTxt(postContentMd);
     const existPost = await Post.findOne({ postId: postId });
-    const postImage = req.file.location;
 
-    console.log(req.file);
+    let postImage;
+
+    if ( postContentMd.includes('](https://') !== false ) {
+    postImage = postContentMd.substring(
+    postContentMd.indexOf('](https://') + 2,
+    postContentMd.indexOf(')')
+    );
+
+    } else {
+
+      postImage = null;
+
+    };
+
     if (nickname === existPost.nickname) {
       if (existPost) {
         await Post.updateOne(
           { postId: postId },
-          { $set: { postTitle, postContent, postImage } }
+          { $set: { postTitle, postContentMd, postImage, postContent } }
         );
-        res.status(200).json({ result: 'success', postImage });
+        res.status(200).json({ result: 'success', postTitle, postContentMd, postImage, postContent });
       } else {
         res.status(400).send({ result: 'fail' });
       }
